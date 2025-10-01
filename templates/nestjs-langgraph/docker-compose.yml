@@ -1,0 +1,44 @@
+# Docker compose configuration for PostgreSQL database with pgai support
+name: nestjs-langgraph-template
+services:
+  dev:
+    image: timescale/timescaledb-ha:pg17
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: db-template
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-template:/home/postgres/pgdata/data
+  vectorizer-worker:
+    image: timescale/pgai-vectorizer-worker:latest
+    environment:
+      PGAI_VECTORIZER_WORKER_DB_URL: postgres://postgres:postgres@dev:5432/db-template
+      OLLAMA_HOST: http://ollama:11434
+    command: [ "--poll-interval", "5s" ]
+
+  test:
+    image: timescale/timescaledb-ha:pg17
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: db-template-test
+    ports:
+      - "5435:5432"
+    volumes:
+      - db-template-test:/home/postgres/pgdata/data
+  test-vectorizer-worker:
+    image: timescale/pgai-vectorizer-worker:latest
+    environment:
+      PGAI_VECTORIZER_WORKER_DB_URL: postgres://postgres:postgres@test:5432/db-template-test
+      OLLAMA_HOST: http://ollama:11434
+    command: [ "--poll-interval", "5s" ]
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+volumes:
+  db-template:
+  db-template-test:
