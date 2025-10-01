@@ -19,8 +19,9 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["src/*"],
-      "@/application/*": ["src/application/*"],
-      "@/core/*": ["src/core/*"],
+      "@/agents/*": ["src/agents/*"],
+      "@/controllers/*": ["src/controllers/*"],
+      "@/modules/*": ["src/modules/*"],
       "@/infrastructure/*": ["src/infrastructure/*"]
     }
   }

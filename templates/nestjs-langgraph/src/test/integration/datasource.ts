@@ -1,6 +1,4 @@
 import { DataSource } from 'typeorm';
-import { Pokemon } from '@/infrastructure/database/entities/pokemon.entity';
-import { User } from '@/infrastructure/database/entities/user.entity';
 
 type TestConfig = {
 	port: number;
@@ -9,7 +7,7 @@ type TestConfig = {
 
 export const testConfig: TestConfig = {
 	port: 5435,
-	database: 'db-pgai-test',
+	database: 'db-template-test',
 };
 
 export const dataSourceIntegrationTest = new DataSource({
@@ -17,6 +15,6 @@ export const dataSourceIntegrationTest = new DataSource({
 	host: 'localhost',
 	username: 'postgres',
 	password: 'postgres',
-	entities: [Pokemon, User],
+	entities: [],
 	...(process.env.NODE_ENV === 'test' ? testConfig : {}),
 });
