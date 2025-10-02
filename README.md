@@ -24,6 +24,19 @@ The `packages/` directories contain shared modules and configurations that are r
 
 - **`packages/biome-config`**: Houses the `biome.json` configuration, applied across the monorepo to standardize environment and project settings.
 
+### Templates
+
+The `templates/` directory contains starter templates for creating new projects with specific technology stacks and best practices.
+
+- **`templates/nestjs-langgraph`**: A production-ready starter template for building AI-powered applications using NestJS and LangGraphJS. This template provides:
+  - NestJS framework with TypeScript
+  - LangGraphJS integration for state-based AI agents
+  - PostgreSQL with TypeORM and pg-ai support
+  - Docker Compose setup with TimescaleDB and Ollama
+  - Testing setup with Jest
+  - Code formatting and linting with Biome
+  - Complete example agent implementation
+
 ## Getting Started
 
 To get started with this monorepo, ensure you have the necessary tools and dependencies installed. Follow these steps:
