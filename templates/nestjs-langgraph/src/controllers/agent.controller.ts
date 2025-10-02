@@ -15,9 +15,7 @@ export class AgentController {
 
 	@Post('chat')
 	async chat(@Body() body: ChatRequest) {
-		const response = await this.simpleAgentService.processMessage(
-			body.message,
-		);
+		const response = await this.simpleAgentService.processMessage(body.message);
 		return {
 			response,
 		};

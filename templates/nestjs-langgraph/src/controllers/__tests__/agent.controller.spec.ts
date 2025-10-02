@@ -43,9 +43,9 @@ describe('AgentController', () => {
 	describe('conversation', () => {
 		it('should return a response from conversation', async () => {
 			const mockResponse = 'Paris is the capital of France.';
-			jest.spyOn(service, 'processConversation').mockResolvedValue(
-				mockResponse,
-			);
+			jest
+				.spyOn(service, 'processConversation')
+				.mockResolvedValue(mockResponse);
 
 			const result = await controller.conversation({
 				messages: ['What is the capital of France?'],

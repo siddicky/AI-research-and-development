@@ -7,11 +7,11 @@ A production-ready starter template for building AI-powered applications using *
 - ✅ **NestJS Framework**: Modern, scalable Node.js framework with TypeScript
 - 🤖 **LangGraphJS Integration**: State-based agent workflows with LangGraph
 - 🔗 **LangChain Support**: Full LangChain ecosystem integration
-- 🗄️ **PostgreSQL + TypeORM**: Database with pg-ai and pgai-vectorizer support
+- 🗄️ **MySQL + Prisma**: Database with Prisma ORM for type-safe database access
 - 🧪 **Testing Setup**: Jest configured for E2E testing
 - 📝 **TypeScript**: Strict type checking and modern TypeScript features
 - 🎨 **Biome**: Fast formatter and linter
-- 🐳 **Docker Compose**: PostgreSQL with TimescaleDB and Ollama
+- 🐳 **Docker Compose**: MySQL and Ollama
 
 ## Prerequisites
 
@@ -51,24 +51,19 @@ OPENAI_API_KEY=your-api-key-here
 PORT=3000
 NODE_ENV=development
 
-# Database
-DB_HOST=localhost
-DB_PORT=5434
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=db-template
+# Database (MySQL)
+DATABASE_URL="mysql://mysql:mysql@localhost:3306/db_template"
 ```
 
-### 4. Start PostgreSQL
+### 4. Start MySQL
 
 ```bash
 docker-compose up -d
 ```
 
 This will start:
-- PostgreSQL with TimescaleDB (port 5434)
-- PostgreSQL for testing (port 5435)
-- pgai-vectorizer-worker
+- MySQL for development (port 3306)
+- MySQL for testing (port 3307)
 - Ollama (port 11434)
 
 ### 5. Run the Application
@@ -94,7 +89,7 @@ src/
 ├── controllers/              # API controllers
 │   └── agent.controller.ts  # Agent endpoints
 ├── infrastructure/           # Infrastructure layer
-│   ├── database/            # Database entities and migrations
+│   ├── database/            # Database service (Prisma)
 │   └── seeding/             # Database seeding
 ├── modules/                  # NestJS modules
 │   ├── app.module.ts        # Root module
@@ -178,41 +173,51 @@ pnpm run format:fix         # Fix formatting
 pnpm run lint               # Run linter
 
 # Database
-pnpm run migration:generate --name=<migration-name>  # Generate migration
-pnpm run migration:run                                # Run migrations
-pnpm run seed                                         # Seed database
+pnpm run prisma:generate                          # Generate Prisma Client
+pnpm run prisma:migrate --name=<migration-name>   # Create and apply migration
+pnpm run prisma:studio                            # Open Prisma Studio
+pnpm run prisma:seed                              # Seed database
 ```
 
 ## Database & Migrations
 
-### Creating a New Entity
+### Creating a New Model
 
-1. Create entity in `src/infrastructure/database/entities/`:
+1. Add model to `prisma/schema.prisma`:
 
-```typescript
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
-@Entity()
-export class MyEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  name: string;
+```prisma
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 ```
 
-2. Add to database module entities array
-3. Generate migration:
+2. Generate Prisma Client and create migration:
 
 ```bash
-pnpm run migration:generate --name=create_my_entity
+pnpm run prisma:generate
+pnpm run prisma:migrate --name=create_user
 ```
 
-4. Run migration:
+3. Use in your service:
 
-```bash
-pnpm run migration:run
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/infrastructure/database/prisma.service';
+
+@Injectable()
+export class UserService {
+  constructor(private prisma: PrismaService) {}
+
+  async createUser(email: string, name?: string) {
+    return this.prisma.user.create({
+      data: { email, name },
+    });
+  }
+}
 ```
 
 ## LangGraph Examples
@@ -249,19 +254,14 @@ const model = new ChatOpenAI({
 | `OPENAI_API_KEY` | OpenAI API key for LangGraph | Yes | - |
 | `PORT` | Application port | No | 3000 |
 | `NODE_ENV` | Environment mode | No | development |
-| `DB_HOST` | PostgreSQL host | No | localhost |
-| `DB_PORT` | PostgreSQL port | No | 5434 |
-| `DB_USERNAME` | Database username | No | postgres |
-| `DB_PASSWORD` | Database password | No | postgres |
-| `DB_NAME` | Database name | No | db-template |
+| `DATABASE_URL` | MySQL connection URL | Yes | mysql://mysql:mysql@localhost:3306/db_template |
 
 ## Additional Resources
 
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraphjs/)
 - [LangChain Documentation](https://js.langchain.com/)
-- [TypeORM Documentation](https://typeorm.io/)
-- [pgai Documentation](https://github.com/timescale/pgai)
+- [Prisma Documentation](https://www.prisma.io/docs)
 
 ## License
 

@@ -8,7 +8,7 @@ import { ChatOpenAI } from '@langchain/openai';
  * - State management with Annotation
  * - Graph workflow with nodes and edges
  * - Integration with OpenAI chat models
- * 
+ *
  * This is a basic example that can be extended for more complex use cases.
  */
 

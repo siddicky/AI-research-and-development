@@ -1,39 +1,31 @@
-# Docker compose configuration for PostgreSQL database with pgai support
+# Docker compose configuration for MySQL database
 name: nestjs-langgraph-template
 services:
   dev:
-    image: timescale/timescaledb-ha:pg17
+    image: mysql:8.0
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: db-template
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: db_template
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: mysql
     ports:
-      - "5434:5432"
+      - "3306:3306"
     volumes:
-      - db-template:/home/postgres/pgdata/data
-  vectorizer-worker:
-    image: timescale/pgai-vectorizer-worker:latest
-    environment:
-      PGAI_VECTORIZER_WORKER_DB_URL: postgres://postgres:postgres@dev:5432/db-template
-      OLLAMA_HOST: http://ollama:11434
-    command: [ "--poll-interval", "5s" ]
+      - db-template:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
 
   test:
-    image: timescale/timescaledb-ha:pg17
+    image: mysql:8.0
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: db-template-test
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: db_template_test
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: mysql
     ports:
-      - "5435:5432"
+      - "3307:3306"
     volumes:
-      - db-template-test:/home/postgres/pgdata/data
-  test-vectorizer-worker:
-    image: timescale/pgai-vectorizer-worker:latest
-    environment:
-      PGAI_VECTORIZER_WORKER_DB_URL: postgres://postgres:postgres@test:5432/db-template-test
-      OLLAMA_HOST: http://ollama:11434
-    command: [ "--poll-interval", "5s" ]
+      - db-template-test:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
 
   ollama:
     image: ollama/ollama
