@@ -1,20 +1,19 @@
-import { DataSource } from 'typeorm';
+import { PrismaClient } from '@prisma/client';
 
 type TestConfig = {
-	port: number;
-	database: string;
+	url: string;
 };
 
 export const testConfig: TestConfig = {
-	port: 5435,
-	database: 'db-template-test',
+	url:
+		process.env.TEST_DATABASE_URL ||
+		'mysql://mysql:mysql@localhost:3307/db_template_test',
 };
 
-export const dataSourceIntegrationTest = new DataSource({
-	type: 'postgres',
-	host: 'localhost',
-	username: 'postgres',
-	password: 'postgres',
-	entities: [],
-	...(process.env.NODE_ENV === 'test' ? testConfig : {}),
+export const dataSourceIntegrationTest = new PrismaClient({
+	datasources: {
+		db: {
+			url: testConfig.url,
+		},
+	},
 });

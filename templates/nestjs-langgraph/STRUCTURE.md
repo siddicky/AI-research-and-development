@@ -15,9 +15,8 @@ nestjs-langgraph/
 │   │   │   └── agent.controller.spec.ts
 │   │   └── agent.controller.ts     # Agent API endpoints
 │   ├── infrastructure/              # Infrastructure layer
-│   │   ├── database/               # Database-related code
-│   │   │   └── migrations/         # TypeORM migrations
-│   │   └── repositories/           # Data repositories
+│   │   └── database/               # Database-related code
+│   │       └── prisma.service.ts   # Prisma service
 │   ├── modules/                     # NestJS modules
 │   │   ├── agent.module.ts         # Agent module
 │   │   ├── app.module.ts           # Root application module
@@ -25,9 +24,10 @@ nestjs-langgraph/
 │   ├── test/                        # Test utilities
 │   │   └── integration/            # Integration test config
 │   │       └── datasource.ts
-│   ├── main.ts                      # Application entry point
-│   ├── typeorm.config.ts           # TypeORM configuration
-│   └── typeorm.integration.test.config.ts
+│   └── main.ts                      # Application entry point
+├── prisma/                           # Prisma ORM
+│   ├── schema.prisma                # Database schema
+│   └── seed.ts                      # Database seeding
 ├── test-config/                     # Test configuration
 │   └── jest-e2e.config.mjs         # Jest E2E config
 ├── .env.example                     # Environment variables template
@@ -75,9 +75,9 @@ nestjs-langgraph/
 
 ### Database
 
-- **src/typeorm.config.ts**: Main database configuration
-- **src/typeorm.integration.test.config.ts**: Test database config
-- **src/infrastructure/database/migrations/**: Database schema migrations
+- **prisma/schema.prisma**: Database schema definition
+- **prisma/seed.ts**: Database seeding script
+- **src/infrastructure/database/prisma.service.ts**: Prisma service for dependency injection
 
 ## Technology Stack
 
@@ -93,10 +93,8 @@ nestjs-langgraph/
 - **@langchain/community**: Community tools and utilities
 
 ### Database
-- **PostgreSQL**: Relational database
-- **TypeORM**: Object-relational mapping
-- **TimescaleDB**: Time-series database features
-- **pgai**: PostgreSQL AI extensions
+- **MySQL**: Relational database
+- **Prisma**: Next-generation ORM with type safety
 
 ### Development Tools
 - **Biome**: Fast formatter and linter
@@ -115,7 +113,7 @@ AppModule
 ├── AgentModule
 │   └── SimpleAgentService
 └── DatabaseModule
-    └── TypeORM
+    └── PrismaService
 ```
 
 ## API Endpoints
@@ -140,21 +138,15 @@ Required:
 Optional:
 - `PORT`: Application port (default: 3000)
 - `NODE_ENV`: Environment mode (default: development)
-- `DB_HOST`: Database host (default: localhost)
-- `DB_PORT`: Database port (default: 5434)
-- `DB_USERNAME`: Database username (default: postgres)
-- `DB_PASSWORD`: Database password (default: postgres)
-- `DB_NAME`: Database name (default: db-template)
+- `DATABASE_URL`: MySQL connection string (default: mysql://mysql:mysql@localhost:3306/db_template)
 
 ## Docker Services
 
 The template includes Docker Compose configuration for:
 
-1. **dev**: PostgreSQL with TimescaleDB (port 5434)
-2. **test**: PostgreSQL for testing (port 5435)
-3. **vectorizer-worker**: pgai vectorizer worker
-4. **test-vectorizer-worker**: Test vectorizer worker
-5. **ollama**: Local AI model hosting (port 11434)
+1. **dev**: MySQL for development (port 3306)
+2. **test**: MySQL for testing (port 3307)
+3. **ollama**: Local AI model hosting (port 11434)
 
 ## Testing
 
@@ -193,12 +185,11 @@ pnpm run lint         # Run linter
 3. Import module in `app.module.ts`
 4. Create controller if needed
 
-### Adding Database Entities
+### Adding Database Models
 
-1. Create entity in `src/infrastructure/database/entities/`
-2. Add to database module entities array
-3. Generate migration: `pnpm run migration:generate --name=<name>`
-4. Run migration: `pnpm run migration:run`
+1. Add model to `prisma/schema.prisma`
+2. Generate Prisma Client: `pnpm run prisma:generate`
+3. Create migration: `pnpm run prisma:migrate --name=<name>`
 
 ### Adding New Endpoints
 

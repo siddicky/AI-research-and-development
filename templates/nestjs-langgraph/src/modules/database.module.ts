@@ -1,22 +1,8 @@
-import { testConfig } from '@/test/integration/datasource';
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { PrismaService } from '@/infrastructure/database/prisma.service';
 
 @Module({
-	imports: [
-		TypeOrmModule.forRoot({
-			type: 'postgres',
-			host: 'localhost',
-			port: 5434,
-			username: 'postgres',
-			password: 'postgres',
-			database: 'db-template',
-			entities: [],
-			synchronize: false,
-			logging: false,
-			...(process.env.NODE_ENV === 'test' ? testConfig : {}),
-		}),
-	],
+	providers: [PrismaService],
+	exports: [PrismaService],
 })
 export class DatabaseModule {}
-
