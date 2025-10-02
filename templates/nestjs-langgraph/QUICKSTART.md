@@ -77,7 +77,7 @@ You should get a response from the AI agent!
 
 3. **Read the Docs**: See `README.md` for full documentation and `USAGE.md` for detailed customization instructions.
 
-4. **Add Database Entities**: If you need to store data, follow the TypeORM instructions in the README.
+4. **Add Database Models**: If you need to store data, follow the Prisma instructions in the README.
 
 ## Troubleshooting
 
@@ -113,7 +113,9 @@ pnpm run test:watch       # Run tests in watch mode
 # Database
 docker-compose up -d      # Start database
 docker-compose down       # Stop database
-pnpm run migration:run    # Run migrations
+pnpm run prisma:generate  # Generate Prisma Client
+pnpm run prisma:migrate   # Create and apply migrations
+pnpm run prisma:studio    # Open Prisma Studio GUI
 ```
 
 Happy coding! 🚀
