@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { PrismaClient } from '@prisma/client';
 
 type TestConfig = {
 	port: number;
@@ -10,11 +10,11 @@ export const testConfig: TestConfig = {
 	database: 'db-template-test',
 };
 
-export const dataSourceIntegrationTest = new DataSource({
-	type: 'postgres',
-	host: 'localhost',
-	username: 'postgres',
-	password: 'postgres',
-	entities: [],
-	...(process.env.NODE_ENV === 'test' ? testConfig : {}),
+export const prismaClientIntegrationTest = new PrismaClient({
+	datasources: {
+		db: {
+			url: `postgresql://postgres:postgres@localhost:${testConfig.port}/${testConfig.database}`,
+		},
+	},
+	log: process.env.NODE_ENV === 'test' ? ['error'] : ['query', 'error', 'warn'],
 });
