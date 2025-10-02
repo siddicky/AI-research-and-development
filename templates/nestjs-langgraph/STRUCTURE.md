@@ -16,7 +16,7 @@ nestjs-langgraph/
 │   │   └── agent.controller.ts     # Agent API endpoints
 │   ├── infrastructure/              # Infrastructure layer
 │   │   ├── database/               # Database-related code
-│   │   │   └── migrations/         # TypeORM migrations
+│   │   │   └── migrations/         # Prisma migrations
 │   │   └── repositories/           # Data repositories
 │   ├── modules/                     # NestJS modules
 │   │   ├── agent.module.ts         # Agent module
@@ -25,9 +25,10 @@ nestjs-langgraph/
 │   ├── test/                        # Test utilities
 │   │   └── integration/            # Integration test config
 │   │       └── datasource.ts
-│   ├── main.ts                      # Application entry point
-│   ├── typeorm.config.ts           # TypeORM configuration
-│   └── typeorm.integration.test.config.ts
+│   ├── @nestjs-prisma-singleton.ts # Prisma service singleton
+│   └── main.ts                      # Application entry point
+├── prisma/                           # Prisma ORM
+│   └── schema.prisma                # Database schema
 ├── test-config/                     # Test configuration
 │   └── jest-e2e.config.mjs         # Jest E2E config
 ├── .env.example                     # Environment variables template
@@ -59,6 +60,7 @@ nestjs-langgraph/
 - **src/modules/app.module.ts**: Root module that imports all other modules
 - **src/modules/agent.module.ts**: Module for AI agent functionality
 - **src/modules/database.module.ts**: Database connection configuration
+- **src/@nestjs-prisma-singleton.ts**: Prisma service singleton for database access
 
 ### Agent Implementation
 
@@ -75,8 +77,8 @@ nestjs-langgraph/
 
 ### Database
 
-- **src/typeorm.config.ts**: Main database configuration
-- **src/typeorm.integration.test.config.ts**: Test database config
+- **prisma/schema.prisma**: Database schema definition
+- **src/@nestjs-prisma-singleton.ts**: Prisma service for database operations
 - **src/infrastructure/database/migrations/**: Database schema migrations
 
 ## Technology Stack
@@ -94,7 +96,7 @@ nestjs-langgraph/
 
 ### Database
 - **PostgreSQL**: Relational database
-- **TypeORM**: Object-relational mapping
+- **Prisma**: Modern ORM for TypeScript
 - **TimescaleDB**: Time-series database features
 - **pgai**: PostgreSQL AI extensions
 
@@ -115,7 +117,7 @@ AppModule
 ├── AgentModule
 │   └── SimpleAgentService
 └── DatabaseModule
-    └── TypeORM
+    └── PrismaService
 ```
 
 ## API Endpoints
@@ -140,6 +142,7 @@ Required:
 Optional:
 - `PORT`: Application port (default: 3000)
 - `NODE_ENV`: Environment mode (default: development)
+- `DATABASE_URL`: PostgreSQL connection URL for Prisma
 - `DB_HOST`: Database host (default: localhost)
 - `DB_PORT`: Database port (default: 5434)
 - `DB_USERNAME`: Database username (default: postgres)
@@ -193,12 +196,12 @@ pnpm run lint         # Run linter
 3. Import module in `app.module.ts`
 4. Create controller if needed
 
-### Adding Database Entities
+### Adding Database Models
 
-1. Create entity in `src/infrastructure/database/entities/`
-2. Add to database module entities array
-3. Generate migration: `pnpm run migration:generate --name=<name>`
-4. Run migration: `pnpm run migration:run`
+1. Add model to `prisma/schema.prisma`
+2. Generate Prisma Client: `pnpm run prisma:generate`
+3. Create migration: `pnpm run prisma:migrate`
+4. Use PrismaService in your services
 
 ### Adding New Endpoints
 

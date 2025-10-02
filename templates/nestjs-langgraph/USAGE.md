@@ -76,12 +76,11 @@ Edit `package.json`:
 
 ### 2. Configure Database
 
-The template uses PostgreSQL with TimescaleDB. Update these files if you need different settings:
+The template uses PostgreSQL with Prisma ORM. Update these files if you need different settings:
 
 - `docker-compose.yml` - Database ports, volumes, names
-- `src/modules/database.module.ts` - Database connection settings
-- `src/typeorm.config.ts` - Migration configuration
-- `.env` - Runtime database configuration
+- `prisma/schema.prisma` - Prisma schema and database configuration
+- `.env` - Runtime database configuration (DATABASE_URL)
 
 ### 3. Add Your AI Agents
 
@@ -162,44 +161,53 @@ export class MyController {
 }
 ```
 
-### 5. Add Database Entities
+### 5. Add Database Models
 
 If you need to store data:
 
-1. Create entity in `src/infrastructure/database/entities/`:
+1. Add a model to `prisma/schema.prisma`:
 
-```typescript
-// src/infrastructure/database/entities/my-entity.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
-@Entity('my_entities')
-export class MyEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  name: string;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
+```prisma
+model MyEntity {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("my_entities")
 }
 ```
 
-2. Add to database module:
-
-```typescript
-// src/modules/database.module.ts
-import { MyEntity } from '@/infrastructure/database/entities/my-entity.entity';
-
-// In the entities array:
-entities: [MyEntity],
-```
-
-3. Generate and run migration:
+2. Generate Prisma Client:
 
 ```bash
-pnpm run migration:generate --name=create_my_entity
-pnpm run migration:run
+pnpm run prisma:generate
+```
+
+3. Create and apply migration:
+
+```bash
+pnpm run prisma:migrate
+```
+
+4. Use in your service:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@/@nestjs-prisma-singleton';
+
+@Injectable()
+export class MyService {
+  constructor(private prisma: PrismaService) {}
+  
+  async findAll() {
+    return this.prisma.myEntity.findMany();
+  }
+  
+  async create(data: { name: string }) {
+    return this.prisma.myEntity.create({ data });
+  }
+}
 ```
 
 ## Testing Your Application
@@ -303,7 +311,7 @@ docker run -p 3000:3000 --env-file .env my-app
 
 2. **API Keys**: Store sensitive keys in environment variables, never in code.
 
-3. **Database Migrations**: Always generate migrations for schema changes. Never use `synchronize: true` in production.
+3. **Database Migrations**: Always generate migrations for schema changes using Prisma. Never modify the database schema directly.
 
 4. **Error Handling**: Add proper error handling in your agents and controllers.
 
@@ -339,7 +347,7 @@ docker run -p 3000:3000 --env-file .env my-app
 
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraphjs/)
-- [TypeORM Documentation](https://typeorm.io/)
+- [Prisma Documentation](https://www.prisma.io/docs)
 
 ## Support
 

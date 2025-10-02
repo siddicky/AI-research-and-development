@@ -7,7 +7,7 @@ A production-ready starter template for building AI-powered applications using *
 - ✅ **NestJS Framework**: Modern, scalable Node.js framework with TypeScript
 - 🤖 **LangGraphJS Integration**: State-based agent workflows with LangGraph
 - 🔗 **LangChain Support**: Full LangChain ecosystem integration
-- 🗄️ **PostgreSQL + TypeORM**: Database with pg-ai and pgai-vectorizer support
+- 🗄️ **PostgreSQL + Prisma**: Database with pg-ai and pgai-vectorizer support
 - 🧪 **Testing Setup**: Jest configured for E2E testing
 - 📝 **TypeScript**: Strict type checking and modern TypeScript features
 - 🎨 **Biome**: Fast formatter and linter
@@ -51,7 +51,10 @@ OPENAI_API_KEY=your-api-key-here
 PORT=3000
 NODE_ENV=development
 
-# Database
+# Database (for Prisma)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5434/db-template?schema=public"
+
+# Legacy environment variables (optional, for backward compatibility)
 DB_HOST=localhost
 DB_PORT=5434
 DB_USERNAME=postgres
@@ -178,41 +181,53 @@ pnpm run format:fix         # Fix formatting
 pnpm run lint               # Run linter
 
 # Database
-pnpm run migration:generate --name=<migration-name>  # Generate migration
-pnpm run migration:run                                # Run migrations
-pnpm run seed                                         # Seed database
+pnpm run prisma:generate           # Generate Prisma Client
+pnpm run prisma:migrate             # Create and apply migrations
+pnpm run prisma:migrate:deploy      # Apply migrations in production
+pnpm run prisma:studio              # Open Prisma Studio (GUI)
+pnpm run prisma:seed                # Seed database
 ```
 
 ## Database & Migrations
 
-### Creating a New Entity
+### Creating a New Model
 
-1. Create entity in `src/infrastructure/database/entities/`:
+1. Add a model to `prisma/schema.prisma`:
 
-```typescript
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
-@Entity()
-export class MyEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  name: string;
+```prisma
+model MyEntity {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 ```
 
-2. Add to database module entities array
-3. Generate migration:
+2. Generate Prisma Client:
 
 ```bash
-pnpm run migration:generate --name=create_my_entity
+pnpm run prisma:generate
 ```
 
-4. Run migration:
+3. Create and apply migration:
 
 ```bash
-pnpm run migration:run
+pnpm run prisma:migrate
+```
+
+4. Use in your service:
+
+```typescript
+import { PrismaService } from '@/@nestjs-prisma-singleton';
+
+@Injectable()
+export class MyService {
+  constructor(private prisma: PrismaService) {}
+  
+  async findAll() {
+    return this.prisma.myEntity.findMany();
+  }
+}
 ```
 
 ## LangGraph Examples
@@ -249,6 +264,7 @@ const model = new ChatOpenAI({
 | `OPENAI_API_KEY` | OpenAI API key for LangGraph | Yes | - |
 | `PORT` | Application port | No | 3000 |
 | `NODE_ENV` | Environment mode | No | development |
+| `DATABASE_URL` | PostgreSQL connection URL for Prisma | Yes | - |
 | `DB_HOST` | PostgreSQL host | No | localhost |
 | `DB_PORT` | PostgreSQL port | No | 5434 |
 | `DB_USERNAME` | Database username | No | postgres |
@@ -260,7 +276,7 @@ const model = new ChatOpenAI({
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraphjs/)
 - [LangChain Documentation](https://js.langchain.com/)
-- [TypeORM Documentation](https://typeorm.io/)
+- [Prisma Documentation](https://www.prisma.io/docs)
 - [pgai Documentation](https://github.com/timescale/pgai)
 
 ## License
